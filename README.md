@@ -16,7 +16,7 @@ Receive data from a redis server.
            | Redis port
         - database(int)(0)
            | Index of db to use
-        - key(str)("queue")
+        - queue(str)("queue")
            | name of queue to brpop data from
 
     Queues:
