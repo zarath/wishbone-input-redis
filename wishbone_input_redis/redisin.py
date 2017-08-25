@@ -18,6 +18,7 @@ import redis.connection
 
 redis.connection.socket = gsocket
 
+
 class RedisIn(Actor):
     '''**Receive data from a redis server**
 
@@ -25,11 +26,11 @@ class RedisIn(Actor):
 
     Parameters:
 
-        - redis_host(str)("localhost")
+        - host(str)("localhost")
            |  Redis hostname
-        - redis_port(int)(6379)
+        - port(int)(6379)
            | Redis port
-        - redis_db(int)(0)
+        - database(int)(0)
            | Index of db to use
         - queue(str)("wishbone.in")
            | name of queue to pop data from
@@ -41,12 +42,12 @@ class RedisIn(Actor):
     '''
 
     def __init__(self, actor_config,
-                 redis_host="localhost", redis_port=6379, redis_db=0,
+                 host="localhost", port=6379, database=0,
                  queue="wishbone.in"):
         Actor.__init__(self, actor_config)
-        self.redis_host = redis_host
-        self.redis_port = redis_port
-        self.redis_db = redis_db
+        self.redis_host = host
+        self.redis_port = port
+        self.redis_db = database
         self.queue = queue
         self.pool.createQueue("outbox")
 
@@ -69,5 +70,5 @@ class RedisIn(Actor):
                 sleep(0.1)
             else:
                 evt = Event(line)
-                #pylint: disable=no-member
+                # pylint: disable=no-member
                 self.submit(evt, self.pool.queue.outbox)
