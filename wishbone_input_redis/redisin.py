@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-redisin.py
-==========
+redisin.py.
 
 @author: "Holger Mueller" <holgerm1969@gmx.de>
 
 Wishbone input module to connect with redis servers.
 """
-
 
 from wishbone import Actor
 from wishbone.event import Event
@@ -20,12 +18,12 @@ redis.connection.socket = gsocket
 
 
 class RedisIn(Actor):
-    '''**Receive data from a redis server**
+    """Receive data from a redis server.
 
     Creates a connection to a redis server read data from it.
 
-    Parameters:
-
+    Parameters
+    ----------
         - host(str)("localhost")
            |  Redis hostname
         - port(int)(6379)
@@ -35,15 +33,17 @@ class RedisIn(Actor):
         - queue(str)("wishbone.in")
            | name of queue to pop data from
 
-    Queues:
-
+    Queues
+    ------
         - outbox
            |  Data coming from the outside world.
-    '''
+
+    """
 
     def __init__(self, actor_config,
                  host="localhost", port=6379, database=0,
                  queue="wishbone.in"):
+        """Input module to poll a redis dataabase."""
         Actor.__init__(self, actor_config)
         self.redis_host = host
         self.redis_port = port
@@ -52,16 +52,14 @@ class RedisIn(Actor):
         self.pool.createQueue("outbox")
 
     def preHook(self):
-        '''Sets up redis connection'''
-        conn = redis.Redis(host=self.redis_host, port=self.redis_port)
-        conn.execute_command("SELECT " + str(self.redis_db))
-
-        self.logging.info('Connection to %s created.' % (self.redis_host))
+        """Set up redis connection."""
+        conn = redis.StrictRedis(
+            host=self.redis_host, port=self.redis_port, db=self.redis_db)
+        self.logging.info('Connection to %s created.' % self.redis_host)
         self.sendToBackground(self.drain, conn, self.queue)
 
     def drain(self, connection, queue):
-        '''Reads the redis queue.'''
-
+        """Poll the redis queue."""
         self.logging.info('Started.')
 
         while self.loop():
