@@ -8,7 +8,7 @@ redisin.py.
 Wishbone input module to connect with redis servers.
 """
 
-from wishbone import Actor
+from wishbone.module import InputModule
 from wishbone.event import Event
 from gevent import sleep, socket as gsocket
 import redis
@@ -17,7 +17,7 @@ import redis.connection
 redis.connection.socket = gsocket
 
 
-class RedisIn(Actor):
+class RedisIn(InputModule):
     """Receive data from a redis server.
 
     Creates a connection to a redis server read data from it.
@@ -40,11 +40,18 @@ class RedisIn(Actor):
 
     """
 
-    def __init__(self, actor_config,
-                 host="localhost", port=6379, database=0,
-                 queue="wishbone.in"):
+    def __init__(
+            self,
+            actor_config,
+            host="localhost",
+            port=6379,
+            database=0,
+            queue="wishbone.in",
+            native_events=False,
+            destination="data"
+            ):
         """Input module to poll a redis dataabase."""
-        Actor.__init__(self, actor_config)
+        InputModule.__init__(self, actor_config)
         self.redis_host = host
         self.redis_port = port
         self.redis_db = database
@@ -53,14 +60,16 @@ class RedisIn(Actor):
 
     def preHook(self):
         """Set up redis connection."""
-        conn = redis.StrictRedis(
+        self.conn = redis.StrictRedis(
             host=self.redis_host, port=self.redis_port, db=self.redis_db)
         self.logging.info('Connection to %s created.' % self.redis_host)
-        self.sendToBackground(self.drain, conn, self.queue)
+        self.sendToBackground(self.drain)
 
-    def drain(self, connection, queue):
+    def drain(self):
         """Poll the redis queue."""
         self.logging.info('Started.')
+        connection = self.conn
+        queue = self.queue
 
         while self.loop():
             line = connection.rpop(queue)
@@ -69,4 +78,4 @@ class RedisIn(Actor):
             else:
                 evt = Event(line)
                 # pylint: disable=no-member
-                self.submit(evt, self.pool.queue.outbox)
+                self.submit(evt, "outbox")
