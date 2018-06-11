@@ -32,29 +32,29 @@ Example:
 
 modules:
   input:
-    module: wishbone.input.redis
+    module: wishbone.module.input.redis
 
   mixing:
-    module: wishbone.flow.roundrobin
+    module: wishbone.module.flow.roundrobin
     description: I roundrobin incoming messages
  
   modify1:
-    module: wishbone.function.modify
+    module: wishbone.module.function.modify
     arguments:
       expressions:
          - set: [ "queue1", "redis_key" ]
 
   modify2:
-    module: wishbone.function.modify
+    module: wishbone.module.function.modify
     arguments:
       expressions:
          - set: [ "queue2", "redis_key" ]
 
   funnel:
-    module: wishbone.flow.funnel
+    module: wishbone.module.flow.funnel
 
   output:
-    module: wishbone.output.redis
+    module: wishbone.module.output.redis
     arguments:
       key: redis_key
 
